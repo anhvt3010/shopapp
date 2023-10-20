@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1/products")
+@RequestMapping("${api.prefix}/products")
 public class ProductController {
     @GetMapping("")
     public ResponseEntity<String> getAll(@RequestParam("page") int page,
@@ -50,8 +50,11 @@ public class ProductController {
             }
 
             List<MultipartFile> files = productDTO.getFiles();
-            files = files = null ? new ArrayList<MultipartFile>() : files;
+            files = files == null ? new ArrayList<>() : files;
             for (MultipartFile file : files){
+                if(file.getSize() ==0){
+                    continue;
+                }
                 // kiem tra kich thuoc file
                 if(file.getSize() > 10 * 1024 * 1024){
                     return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
