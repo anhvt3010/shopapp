@@ -4,9 +4,15 @@ import com.anhvt.shopapp.dtos.ProductDTO;
 import com.anhvt.shopapp.dtos.ProductImageDTO;
 import com.anhvt.shopapp.models.Product;
 import com.anhvt.shopapp.models.ProductImage;
+import com.anhvt.shopapp.responses.ProductListResponse;
+import com.anhvt.shopapp.responses.ProductResponse;
 import com.anhvt.shopapp.services.IProductService;
+import com.github.javafaker.Faker;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,15 +38,29 @@ import java.util.UUID;
 public class ProductController {
     private final IProductService productService;
     @GetMapping("")
-    public ResponseEntity<String> getAll(@RequestParam("page") int page,
-                                         @RequestParam("limit") int limit )
+    public ResponseEntity<ProductListResponse> getAll(@RequestParam("page") int page,
+                                                      @RequestParam("limit") int limit )
     {
-        return ResponseEntity.ok("chao ban haha");
+        // tao pageable tu thong tin trang va gioi han
+        PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("createdAt").descending());
+        Page<ProductResponse> productPages = productService.getAllProducts(pageRequest);
+        // lay ra tong so trang
+        int totalPages = productPages.getTotalPages();
+        List<ProductResponse> products = productPages.getContent();
+        return ResponseEntity.ok(ProductListResponse.builder()
+                        .products(products)
+                        .totalPages(totalPages)
+                .build());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<String> getByID(@PathVariable("id") int id){
-        return ResponseEntity.ok("");
+    public ResponseEntity<?> getByID(@PathVariable("id") Long id) {
+        try {
+            Product existingProduct = productService.getProductById(id);
+            return ResponseEntity.ok(ProductResponse.fromProduct(existingProduct));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Product not found");
+        }
     }
 
     @PostMapping(value = "")
@@ -133,12 +153,48 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> update(@PathVariable int id){
-        return ResponseEntity.ok("");
+    public ResponseEntity<?> update(@PathVariable Long id,
+                                         @RequestBody ProductDTO productDTO){
+        try{
+            Product updatedProduct = productService.updateProduct(id, productDTO);
+            return ResponseEntity.ok(updatedProduct);
+        } catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable int id){
-        return ResponseEntity.ok("");
+    public ResponseEntity<?> delete(@PathVariable Long id){
+        try {
+            productService.deleteProduct(id);
+            return ResponseEntity.ok("Delete product successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Product not found!");
+        }
+    }
+
+//    @PostMapping("/generateFakeProducts")
+    public ResponseEntity<?> generateFakeProducts(){
+        Faker faker = new Faker();
+        for(int i = 0; i < 100; i++){
+            String productName = faker.commerce().productName();
+            if(productService.existsByName(productName)){
+                continue;
+            }
+            ProductDTO productDTO = ProductDTO.builder()
+                    .name(productName)
+                    .price((float) faker.number().numberBetween(0, 90000000))
+                    .thumbnail("")
+                    .description(faker.lorem().sentence())
+                    .categoryId((long) faker.number().numberBetween(2,6))
+                    .build();
+            try {
+                productService.createProduct(productDTO);
+            } catch (Exception e){
+                return ResponseEntity.badRequest().body(e.getMessage());
+            }
+        }
+        return ResponseEntity.ok("Fake products created successfully");
     }
 }

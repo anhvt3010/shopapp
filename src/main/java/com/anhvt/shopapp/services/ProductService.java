@@ -10,6 +10,7 @@ import com.anhvt.shopapp.models.ProductImage;
 import com.anhvt.shopapp.repositories.CategoryRepository;
 import com.anhvt.shopapp.repositories.ProductImageRepository;
 import com.anhvt.shopapp.repositories.ProductRepository;
+import com.anhvt.shopapp.responses.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,9 +46,13 @@ public class ProductService implements IProductService{
                 .orElseThrow(() -> new DataNotFoundException("Product not found!"));
     }
 
-//    @Override
-    public Page<Product> getAllProducts(String keyword, Long categoryId, PageRequest pageRequest) {
-        return productRepository.findAll(pageRequest);
+    @Override
+    public Page<ProductResponse> getAllProducts(
+//            String keyword, Long categoryId,
+            PageRequest pageRequest) {
+        return productRepository
+                .findAll(pageRequest)
+                .map(ProductResponse::fromProduct);
     }
 
     @Override
