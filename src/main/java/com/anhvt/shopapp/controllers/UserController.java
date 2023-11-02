@@ -43,9 +43,9 @@ public class UserController {
     public ResponseEntity<?> login(@Valid @RequestBody UserLoginDTO userLoginDTO){
         try{
             // kiem tra dang nhap va sinh token
-            String token = userService.login(userLoginDTO.getPhoneNumber(), userLoginDTO.getPassword(), userLoginDTO.getRoleId());
+//            String token = userService.login(userLoginDTO.getPhoneNumber(), userLoginDTO.getPassword(), userLoginDTO.getRoleId());
             // tra ve token trong response
-            return ResponseEntity.ok(token);
+            return ResponseEntity.ok("");
         } catch (Exception e){
             return ResponseEntity.badRequest().body("");
         }

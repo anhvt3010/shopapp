@@ -11,10 +11,10 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface IOrderService {
-    OrderResponse createOrder(OrderDTO orderDTO) throws Exception;
-    Order getOrder(Long id);
+    Order createOrder(OrderDTO orderDTO) throws Exception;
+    Order getOrder(Long id) throws DataNotFoundException, Exception;
     Order updateOrder(Long id, OrderDTO orderDTO) throws DataNotFoundException;
-    void deleteOrder(Long id);
+    void deleteOrder(Long id) throws DataNotFoundException;
     List<Order> findByUserId(Long userId);
     Page<Order> getOrdersByKeyword(String keyword, Pageable pageable);
 }
