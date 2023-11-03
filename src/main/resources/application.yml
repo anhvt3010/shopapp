@@ -25,4 +25,8 @@ api:
 
 jwt:
   expiration: 2592000
-  secretKey: anhvt
+  secretKey: sLVRb9MZ7ZdKUqkkcSkRG5P+kxrteiq3lESB+9YoqFA=
+
+token:
+  eyJhbGciOiJIUzI1NiJ9:eyJwaG9uZU51bWJlciI6IjA5ODg1MjY2OTciLCJzdWIiOiIwOTg4NTI2Njk3IiwiZXhwIjoxNzAxNTUwMTE1fQ:
+  gKWgFZpelUYMGsB72vk7EBqnkzuQvBtRdwLzqfzzRF0:
