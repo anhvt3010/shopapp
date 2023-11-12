@@ -1,7 +1,6 @@
 package com.anhvt.shopapp.components;
 
 import com.anhvt.shopapp.exceptions.InvalidParamException;
-import com.anhvt.shopapp.models.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -15,9 +14,6 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.security.SecureRandom;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +21,7 @@ import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
-public class JwtTokenUtil {
+public class JwtTokenUtils {
 
     @Value("${jwt.expiration}")
     private int expiration; // save environment variable;

@@ -2,7 +2,10 @@ package com.anhvt.shopapp.controllers;
 
 import com.anhvt.shopapp.dtos.UserDTO;
 import com.anhvt.shopapp.dtos.UserLoginDTO;
+import com.anhvt.shopapp.responses.LoginResponse;
 import com.anhvt.shopapp.services.IUserService;
+import com.anhvt.shopapp.components.LocalizationUtils;
+import com.anhvt.shopapp.utils.MessageKeys;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final IUserService userService;
+    private final LocalizationUtils localizationUtils;
     @PostMapping("/register")
     public ResponseEntity<?> createUser(@Valid @RequestBody UserDTO userDTO,
                                         BindingResult result) {
@@ -39,14 +43,20 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody UserLoginDTO userLoginDTO){
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody UserLoginDTO userLoginDTO){
         try{
             // kiem tra dang nhap va sinh token
             String token = userService.login(userLoginDTO.getPhoneNumber(), userLoginDTO.getPassword(), userLoginDTO.getRoleId());
             // tra ve token trong response
-            return ResponseEntity.ok(token);
+            return ResponseEntity.ok(LoginResponse.builder()
+                    .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_SUCCESSFULLY))
+                    .token(token)
+                    .build());
         } catch (Exception e){
-            return ResponseEntity.badRequest().body("");
+            return ResponseEntity.badRequest().body(
+                    LoginResponse.builder()
+                            .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_FAILED, e.getMessage()))
+                            .build());
         }
     }
 }

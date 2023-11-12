@@ -1,9 +1,10 @@
 package com.anhvt.shopapp.services;
 
-import com.anhvt.shopapp.components.JwtTokenUtil;
+import com.anhvt.shopapp.components.JwtTokenUtils;
 import com.anhvt.shopapp.dtos.UpdateUserDTO;
 import com.anhvt.shopapp.dtos.UserDTO;
 import com.anhvt.shopapp.exceptions.DataNotFoundException;
+import com.anhvt.shopapp.exceptions.PermissionDenyException;
 import com.anhvt.shopapp.models.Role;
 import com.anhvt.shopapp.models.User;
 import com.anhvt.shopapp.repositories.RoleRepository;
@@ -25,7 +26,7 @@ public class UserService implements IUserService{
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenUtil jwtTokenUtil;
+    private final JwtTokenUtils jwtTokenUtils;
     private final AuthenticationManager authenticationManager;
 
     @Override
@@ -34,6 +35,11 @@ public class UserService implements IUserService{
         // kiem tra sdt ton tai
         if(userRepository.existsByPhoneNumber(phoneNumber)){
             throw new DataIntegrityViolationException("Phone number already exists");
+        }
+        Role role = roleRepository.findById(userDTO.getRoleId())
+                .orElseThrow(() -> new DataNotFoundException("Role not found!"));
+        if(role.getName().toUpperCase().equals(Role.ADMIN)){
+            throw new PermissionDenyException("You cannot register an admin account");
         }
         // convert userDTO -> user
         User user = User.builder()
@@ -46,8 +52,7 @@ public class UserService implements IUserService{
                 .googleAccountId(userDTO.getGoogleAccountId())
                 .active(true)
                 .build();
-        Role role = roleRepository.findById(userDTO.getRoleId())
-                .orElseThrow(() -> new DataNotFoundException("Role not found!"));
+
         user.setRole(role);
         // kiem tra neu co account id, khong yeu ca password
         if(userDTO.getGoogleAccountId() == 0 && userDTO.getFacebookAccountId() ==0){
@@ -76,7 +81,7 @@ public class UserService implements IUserService{
         );
         // authenticate with java spring security
         authenticationManager.authenticate(authenticationToken);
-        return jwtTokenUtil.generateToken(existingUser);
+        return jwtTokenUtils.generateToken(existingUser);
     }
 
     @Override
